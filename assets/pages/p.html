@@ -13,7 +13,7 @@
         
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register("/sw.js").then(() => {
-                console.log("Waffle Service Worker registered successfully.");
+                console.log("Waffle Service Worker registered successfully from root.");
             }).catch(err => console.error("SW registration failed:", err));
         }
     </script>
@@ -39,7 +39,6 @@
             color: #fff;
         }
 
-        /* Sidebar Persistence */
         .liquid-glass {
             background: var(--glass);
             border: 1px solid var(--border);
@@ -82,7 +81,6 @@
             border: 1px solid var(--border);
         }
 
-        /* Browser Main UI */
         main {
             flex: 1;
             display: flex;
@@ -198,7 +196,7 @@
         const params = new URLSearchParams(window.location.search);
         const initialUrl = params.get('url');
 
-        // logic from user's snippet
+        // Connection logic literally from your snippet
         const connection = new BareMux.BareMuxConnection("/sail/baremux/worker.js");
         connection.setTransport("/sail/libcurl/index.mjs", [{ websocket: "wss://wisp.rhw.one/" }]);
 

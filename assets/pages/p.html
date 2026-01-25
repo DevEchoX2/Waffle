@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waffle | Browser</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    
+    <script src="/sail/baremux/index.js"></script>
+    <script src="/sail/scram/scramjet.all.js"></script>
+    <script>
+        
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register("/sw.js").then(() => {
+                console.log("Waffle Service Worker registered successfully.");
+            }).catch(err => console.error("SW registration failed:", err));
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --bg: #000;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --sidebar-width: 80px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: #000; 
+            height: 100vh; 
+            display: flex; 
+            overflow: hidden; 
+            color: #fff;
+        }
+
+        /* Sidebar Persistence */
+        .liquid-glass {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(0px) !important;
+        }
+
+        aside {
+            width: var(--sidebar-width);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            z-index: 100;
+            border-right: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .logo { font-size: 24px; font-weight: 900; margin-bottom: 60px; cursor: pointer; transition: 0.3s; }
+        .logo:hover { transform: scale(1.1); }
+
+        .nav-items { flex: 1; display: flex; flex-direction: column; gap: 25px; }
+
+        .nav-link {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 20px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        /* Browser Main UI */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+            background: #000;
+        }
+
+        .toolbar { 
+            height: 65px; 
+            background: rgba(0,0,0,0.85); 
+            display: flex; 
+            align-items: center; 
+            padding: 0 20px; 
+            gap: 15px; 
+            border-bottom: 1px solid var(--border); 
+            z-index: 10;
+        }
+
+        .btn { 
+            background: none; 
+            border: none; 
+            color: rgba(255,255,255,0.4); 
+            cursor: pointer; 
+            font-size: 1rem; 
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            transition: 0.2s;
+        }
+        
+        .btn:hover { color: #fff; background: rgba(255,255,255,0.06); }
+
+        .omnibar { 
+            flex: 1; 
+            background: rgba(255,255,255,0.04); 
+            border: 1px solid var(--border);
+            border-radius: 14px; 
+            padding: 0 18px; 
+            height: 42px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 900px;
+        }
+
+        .omnibar input {
+            background: none;
+            border: none;
+            outline: none;
+            color: #fff;
+            width: 100%;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .omnibar i { opacity: 0.2; font-size: 14px; }
+
+        .viewport { 
+            flex: 1; 
+            position: relative; 
+            background: #fff; 
+            overflow: hidden; 
+        }
+
+        iframe { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            background: #fff; 
+            display: block;
+        }
+
+        body.solid-mode .liquid-glass { background: #0a0a0a; border-color: #1a1a1a; }
+    </style>
+</head>
+<body class="liquid-mode">
+    <aside class="liquid-glass">
+        <div class="logo" onclick="location.href='../../index.html'">W</div>
+        <div class="nav-items">
+            <a href="../../index.html" class="nav-link" title="Home"><i class="fas fa-house"></i></a>
+            <a href="games.html" class="nav-link" title="Games"><i class="fas fa-gamepad"></i></a>
+            <a href="iframe.html" class="nav-link" title="Movies"><i class="fas fa-clapperboard"></i></a>
+            <a href="extra.html" class="nav-link" title="Apps"><i class="fas fa-th-large"></i></a>
+            <a href="settings.html" class="nav-link" title="Settings"><i class="fas fa-cog"></i></a>
+        </div>
+        <div style="font-size: 10px; opacity: 0.2; font-weight: 900; letter-spacing: 1px;">WAFFLE</div>
+    </aside>
+
+    <main>
+        <div class="toolbar">
+            <button class="btn" onclick="history.back()"><i class="fas fa-chevron-left"></i></button>
+            <button class="btn" onclick="pframe.contentWindow.location.reload()"><i class="fas fa-rotate-right"></i></button>
+            <div class="omnibar">
+                <i class="fas fa-globe"></i>
+                <input type="text" id="url-bar" placeholder="Enter URL or search...">
+            </div>
+            <button class="btn" onclick="location.href='settings.html'"><i class="fas fa-gear"></i></button>
+        </div>
+        <div class="viewport">
+            <iframe id="pframe" name="pframe" allowfullscreen sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation allow-top-navigation-by-user-activation"></iframe>
+        </div>
+    </main>
+
+    <script src="../js/particle.js"></script>
+    <script>
+        const frame = document.getElementById('pframe');
+        const urlBar = document.getElementById('url-bar');
+        const params = new URLSearchParams(window.location.search);
+        const initialUrl = params.get('url');
+
+        // logic from user's snippet
+        const connection = new BareMux.BareMuxConnection("/sail/baremux/worker.js");
+        connection.setTransport("/sail/libcurl/index.mjs", [{ websocket: "wss://wisp.rhw.one/" }]);
+
+        const { ScramjetController } = $scramjetLoadController();
+        const scramjet = new ScramjetController({
+            files: {
+                all: "/sail/scram/scramjet.all.js",
+                wasm: "/sail/scram/scramjet.wasm.wasm",
+                sync: "/sail/scram/scramjet.sync.js"
+            },
+            prefix: "/sail/go/" 
+        });
+
+        async function nav(val) {
+            let url = val || urlBar.value.trim();
+            if (!url) return;
+
+            if (!url.includes(".")) {
+                url = "https://search.brave.com/search?q=" + encodeURIComponent(url);
+            } else if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                url = "https://" + url;
+            }
+
+            urlBar.value = url;
+            frame.src = scramjet.encodeUrl(url);
+        }
+
+        
+        scramjet.init().then(() => {
+            if (initialUrl) {
+                nav(decodeURIComponent(initialUrl));
+            }
+        });
+
+        urlBar.onkeydown = (e) => {
+            if (e.key === 'Enter') nav();
+        };
+
+        if (localStorage.getItem('liquid-glass') === 'false') {
+            document.body.classList.add('solid-mode');
+        }
+    </script>
+</body>
+</html>

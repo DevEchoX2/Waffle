@@ -10,6 +10,7 @@
     <script src="/sail/baremux/index.js"></script>
     <script src="/sail/scram/scramjet.all.js"></script>
     <script>
+        // Registering the root-level service worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register("/sw.js").then(() => {
                 console.log("Waffle Service Worker registered successfully.");
@@ -25,7 +26,6 @@
             --glass: rgba(255, 255, 255, 0.03);
             --border: rgba(255, 255, 255, 0.08);
             --sidebar-width: 80px;
-            --accent: #fff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -45,7 +45,6 @@
             backdrop-filter: blur(0px) !important;
         }
 
-        /* Fixed Left Sidebar */
         aside {
             width: var(--sidebar-width);
             height: 100vh;
@@ -58,8 +57,8 @@
             flex-shrink: 0;
         }
 
-        .logo-btn { font-size: 24px; font-weight: 900; margin-bottom: 60px; cursor: pointer; transition: 0.3s; }
-        .logo-btn:hover { transform: scale(1.1); }
+        .logo { font-size: 24px; font-weight: 900; margin-bottom: 60px; cursor: pointer; transition: 0.3s; }
+        .logo:hover { transform: scale(1.1); }
 
         .nav-items { flex: 1; display: flex; flex-direction: column; gap: 25px; }
 
@@ -82,180 +81,89 @@
             border: 1px solid var(--border);
         }
 
-        /* Main Workspace */
         main {
             flex: 1;
             display: flex;
             flex-direction: column;
             height: 100vh;
             position: relative;
-            background: transparent;
-        }
-
-        /* Home Screen (similar to image) */
-        #home-screen {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            z-index: 5;
-            transition: opacity 0.4s ease, visibility 0.4s;
-        }
-
-        .hero-title {
-            font-size: 8rem;
-            font-weight: 900;
-            letter-spacing: -8px;
-            margin-bottom: 40px;
-            background: linear-gradient(180deg, #fff, #444);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            user-select: none;
-            filter: drop-shadow(0 0 30px rgba(255,255,255,0.1));
-        }
-
-        .main-search {
-            width: 100%;
-            max-width: 650px;
-            height: 55px;
-            padding: 0 25px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 50px;
-        }
-
-        .main-search input {
-            flex: 1;
-            background: none;
-            border: none;
-            outline: none;
-            color: #fff;
-            font-size: 1.1rem;
-            font-family: inherit;
-        }
-
-        .shortcuts {
-            display: flex;
-            gap: 25px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .shortcut {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .shortcut:hover { transform: translateY(-5px); }
-
-        .icon-box {
-            width: 55px;
-            height: 55px;
-            border-radius: 14px;
             background: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            transition: 0.3s;
         }
 
-        .shortcut:hover .icon-box { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); }
-
-        .icon-box img { width: 30px; height: 30px; object-fit: contain; }
-        .icon-box i { font-size: 24px; }
-
-        .shortcut span {
-            font-size: 11px;
-            font-weight: 700;
-            color: rgba(255,255,255,0.5);
-            text-transform: capitalize;
-        }
-
-        /* Viewport (Hidden initially) */
-        #viewport-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: calc(100% - 75px); /* Space for bottom bar */
-            background: #fff;
+        .toolbar { 
+            height: 65px; 
+            background: rgba(0,0,0,0.85); 
+            display: flex; 
+            align-items: center; 
+            padding: 0 20px; 
+            gap: 15px; 
+            border-bottom: 1px solid var(--border); 
             z-index: 10;
-            display: none;
         }
 
-        iframe { width: 100%; height: 100%; border: none; background: #fff; }
-
-        /* Bottom Toolbar (footer browser controls) */
-        .bottom-bar {
-            height: 75px;
-            background: rgba(0,0,0,0.9);
-            border-top: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            gap: 12px;
-            z-index: 20;
-            margin-top: auto;
-        }
-
-        .tool-btn {
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
+        .btn { 
+            background: none; 
+            border: none; 
+            color: rgba(255,255,255,0.4); 
+            cursor: pointer; 
+            font-size: 1rem; 
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            color: rgba(255,255,255,0.4);
-            cursor: pointer;
+            border-radius: 12px;
             transition: 0.2s;
         }
+        
+        .btn:hover { color: #fff; background: rgba(255,255,255,0.06); }
 
-        .tool-btn:hover { color: #fff; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
-
-        .address-bar {
-            flex: 1;
-            height: 42px;
-            background: rgba(255,255,255,0.02);
+        .omnibar { 
+            flex: 1; 
+            background: rgba(255,255,255,0.04); 
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 0 15px;
+            border-radius: 14px; 
+            padding: 0 18px; 
+            height: 42px;
             display: flex;
             align-items: center;
-            max-width: 800px;
+            gap: 12px;
+            max-width: 900px;
         }
 
-        .address-bar input {
-            flex: 1;
+        .omnibar input {
             background: none;
             border: none;
             outline: none;
             color: #fff;
-            font-size: 13px;
+            width: 100%;
+            font-size: 14px;
             font-family: inherit;
         }
 
-        .address-bar i { opacity: 0.2; font-size: 13px; margin-right: 10px; }
+        .omnibar i { opacity: 0.2; font-size: 14px; }
 
-        .right-tools { display: flex; gap: 8px; margin-left: auto; }
+        .viewport { 
+            flex: 1; 
+            position: relative; 
+            background: #fff; 
+            overflow: hidden; 
+        }
+
+        iframe { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            background: #fff; 
+            display: block;
+        }
 
         body.solid-mode .liquid-glass { background: #0a0a0a; border-color: #1a1a1a; }
-        body.solid-mode .bottom-bar { background: #050505; }
     </style>
 </head>
 <body class="liquid-mode">
     <aside class="liquid-glass">
-        <div class="logo-btn" onclick="resetHome()">W</div>
+        <div class="logo" onclick="location.href='../../index.html'">W</div>
         <div class="nav-items">
             <a href="../../index.html" class="nav-link" title="Home"><i class="fas fa-house"></i></a>
             <a href="games.html" class="nav-link" title="Games"><i class="fas fa-gamepad"></i></a>
@@ -267,64 +175,17 @@
     </aside>
 
     <main>
-        <!-- Home View -->
-        <div id="home-screen">
-            <h1 class="hero-title">WAFFLE</h1>
-            <div class="main-search liquid-glass">
-                <input type="text" id="main-search-input" placeholder="Search with Freedom..">
+        <div class="toolbar">
+            <button class="btn" onclick="history.back()"><i class="fas fa-chevron-left"></i></button>
+            <button class="btn" onclick="pframe.contentWindow.location.reload()"><i class="fas fa-rotate-right"></i></button>
+            <div class="omnibar">
+                <i class="fas fa-globe"></i>
+                <input type="text" id="url-bar" placeholder="Enter URL or search...">
             </div>
-            <div class="shortcuts">
-                <div class="shortcut" onclick="nav('https://youtube.com')">
-                    <div class="icon-box"><i class="fab fa-youtube" style="color: #ff0000;"></i></div>
-                    <span>YouTube</span>
-                </div>
-                <div class="shortcut" onclick="nav('https://discord.com')">
-                    <div class="icon-box"><i class="fab fa-discord" style="color: #5865f2;"></i></div>
-                    <span>Discord</span>
-                </div>
-                <div class="shortcut" onclick="window.location.href='iframe.html'">
-                    <div class="icon-box"><i class="fas fa-clapperboard" style="color: #ffcc00;"></i></div>
-                    <span>Movies</span>
-                </div>
-                <div class="shortcut" onclick="nav('https://deadshot.io')">
-                    <div class="icon-box"><i class="fas fa-gun"></i></div>
-                    <span>Deadshot</span>
-                </div>
-                <div class="shortcut" onclick="nav('https://chatgpt.com')">
-                    <div class="icon-box"><img src="https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" alt="ChatGPT"></div>
-                    <span>ChatGPT</span>
-                </div>
-                <div class="shortcut" onclick="window.location.href='extra.html'">
-                    <div class="icon-box" style="border-style: dashed; opacity: 0.5;"><i class="fas fa-plus"></i></div>
-                    <span>Add</span>
-                </div>
-            </div>
+            <button class="btn" onclick="location.href='settings.html'"><i class="fas fa-gear"></i></button>
         </div>
-
-        <!-- Browser Viewport -->
-        <div id="viewport-screen">
+        <div class="viewport">
             <iframe id="pframe" name="pframe" allowfullscreen sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation allow-top-navigation-by-user-activation"></iframe>
-        </div>
-
-        <!-- Footer Controls (similar to bottom bar in image) -->
-        <div class="bottom-bar">
-            <button class="tool-btn" onclick="history.back()"><i class="fas fa-chevron-left"></i></button>
-            <button class="tool-btn" onclick="history.forward()"><i class="fas fa-chevron-right"></i></button>
-            <button class="tool-btn" onclick="pframe.contentWindow.location.reload()"><i class="fas fa-rotate-right"></i></button>
-            <button class="tool-btn" onclick="resetHome()"><i class="fas fa-house"></i></button>
-            
-            <div class="address-bar">
-                <i class="fas fa-magnifying-glass"></i>
-                <input type="text" id="url-bar" placeholder="Search with Freedom...">
-            </div>
-
-            <div class="right-tools">
-                <button class="tool-btn"><i class="fas fa-columns"></i></button>
-                <button class="tool-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
-                <button class="tool-btn"><i class="fas fa-history"></i></button>
-                <button class="tool-btn"><i class="fas fa-lock"></i></button>
-                <button class="tool-btn" onclick="location.href='settings.html'"><i class="fas fa-gear"></i></button>
-            </div>
         </div>
     </main>
 
@@ -332,14 +193,10 @@
     <script>
         const frame = document.getElementById('pframe');
         const urlBar = document.getElementById('url-bar');
-        const mainSearchInput = document.getElementById('main-search-input');
-        const homeScreen = document.getElementById('home-screen');
-        const viewportScreen = document.getElementById('viewport-screen');
-        
         const params = new URLSearchParams(window.location.search);
         const initialUrl = params.get('url');
 
-        // Connection Logic
+        // Sail Connection logic
         const connection = new BareMux.BareMuxConnection("/sail/baremux/worker.js");
         connection.setTransport("/sail/libcurl/index.mjs", [{ websocket: "wss://wisp.rhw.one/" }]);
 
@@ -354,7 +211,7 @@
         });
 
         async function nav(val) {
-            let url = val || "";
+            let url = val || urlBar.value.trim();
             if (!url) return;
 
             if (!url.includes(".")) {
@@ -364,28 +221,7 @@
             }
 
             urlBar.value = url;
-            mainSearchInput.value = url;
             frame.src = scramjet.encodeUrl(url);
-            
-            // Show Viewport
-            homeScreen.style.display = 'none';
-            viewportScreen.style.display = 'block';
-        }
-
-        function resetHome() {
-            homeScreen.style.display = 'flex';
-            viewportScreen.style.display = 'none';
-            frame.src = "about:blank";
-            urlBar.value = "";
-            mainSearchInput.value = "";
-        }
-
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else if (document.exitFullscreen) {
-                document.exitFullscreen();
-            }
         }
 
         // Initialize and handle first load
@@ -396,11 +232,7 @@
         });
 
         urlBar.onkeydown = (e) => {
-            if (e.key === 'Enter') nav(urlBar.value);
-        };
-        
-        mainSearchInput.onkeydown = (e) => {
-            if (e.key === 'Enter') nav(mainSearchInput.value);
+            if (e.key === 'Enter') nav();
         };
 
         if (localStorage.getItem('liquid-glass') === 'false') {

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waffle | Movies</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;800;900&display=swap');
+        
+        :root {
+            --bg: #000;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --sidebar-width: 80px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: transparent;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .liquid-glass {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(0px) !important;
+        }
+
+        aside {
+            width: var(--sidebar-width);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            z-index: 100;
+            border-right: 1px solid var(--border);
+        }
+
+        .logo { font-size: 24px; font-weight: 900; margin-bottom: 60px; cursor: pointer; }
+
+        .nav-items { flex: 1; display: flex; flex-direction: column; gap: 25px; }
+
+        .nav-link {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 20px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        main { flex: 1; position: relative; display: flex; flex-direction: column; }
+
+        .frame-container {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            position: relative;
+            z-index: 10;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        body.solid-mode .liquid-glass { background: #0a0a0a; border-color: #1a1a1a; }
+    </style>
+</head>
+<body>
+    <aside class="liquid-glass">
+        <div class="logo" onclick="location.href='../../index.html'">W</div>
+        <div class="nav-items">
+            <a href="../../index.html" class="nav-link" title="Home"><i class="fas fa-house"></i></a>
+            <a href="games.html" class="nav-link" title="Games"><i class="fas fa-gamepad"></i></a>
+            <a href="iframe.html" class="nav-link active" title="Movies"><i class="fas fa-clapperboard"></i></a>
+            <a href="extra.html" class="nav-link" title="Apps"><i class="fas fa-th-large"></i></a>
+            <a href="settings.html" class="nav-link" title="Settings"><i class="fas fa-cog"></i></a>
+        </div>
+    </aside>
+
+    <main>
+        <div class="frame-container">
+            <iframe src="https://cineby.gd" allowfullscreen></iframe>
+        </div>
+    </main>
+
+    <script src="../js/particle.js"></script>
+    <script>
+        if (localStorage.getItem('liquid-glass') === 'false') {
+            document.body.classList.add('solid-mode');
+        }
+    </script>
+</body>
+</html>

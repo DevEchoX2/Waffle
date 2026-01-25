@@ -117,8 +117,7 @@
         <div class="settings-wrap liquid-glass">
             <div class="group">
                 <span class="label">Proxy Engine</span>
-                <select id="engine-select">
-                    <option value="uv">Ultraviolet (Smooth)</option>
+                <select disabled>
                     <option value="scramjet">Scramjet (Hybrid)</option>
                 </select>
             </div>
@@ -141,22 +140,15 @@
 
     <script src="../js/particle.js"></script>
     <script>
-        const engine = document.getElementById('engine-select');
         const particles = document.getElementById('particle-select');
         const glass = document.getElementById('glass-select');
 
         // Initial load
-        engine.value = localStorage.getItem('proxy-engine') || 'uv';
         particles.value = localStorage.getItem('particles-enabled') !== 'false' ? 'true' : 'false';
         glass.value = localStorage.getItem('liquid-glass') || 'true';
 
-        engine.onchange = () => {
-            localStorage.setItem('proxy-engine', engine.value);
-        };
-
         particles.onchange = () => {
             localStorage.setItem('particles-enabled', particles.value);
-            // Instant refresh is usually nicer for visual settings
             location.reload();
         };
         

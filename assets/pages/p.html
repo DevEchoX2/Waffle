@@ -10,7 +10,6 @@
     <script src="/sail/baremux/index.js"></script>
     <script src="/sail/scram/scramjet.all.js"></script>
     <script>
-        // Registering the root-level service worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register("/sw.js").then(() => {
                 console.log("Waffle Service Worker registered successfully.");
@@ -24,7 +23,9 @@
         :root {
             --bg: #000;
             --glass: rgba(255, 255, 255, 0.03);
+            --glass-hover: rgba(255, 255, 255, 0.07);
             --border: rgba(255, 255, 255, 0.08);
+            --accent: #fff;
             --sidebar-width: 80px;
         }
 
@@ -45,6 +46,7 @@
             backdrop-filter: blur(0px) !important;
         }
 
+        /* Sidebar UI */
         aside {
             width: var(--sidebar-width);
             height: 100vh;
@@ -55,6 +57,7 @@
             z-index: 100;
             border-right: 1px solid var(--border);
             flex-shrink: 0;
+            background: rgba(0,0,0,0.5);
         }
 
         .logo { font-size: 24px; font-weight: 900; margin-bottom: 60px; cursor: pointer; transition: 0.3s; }
@@ -81,6 +84,7 @@
             border: 1px solid var(--border);
         }
 
+        /* Main Browser Window */
         main {
             flex: 1;
             display: flex;
@@ -90,75 +94,206 @@
             background: #000;
         }
 
-        .toolbar { 
-            height: 65px; 
-            background: rgba(0,0,0,0.85); 
-            display: flex; 
-            align-items: center; 
-            padding: 0 20px; 
-            gap: 15px; 
-            border-bottom: 1px solid var(--border); 
-            z-index: 10;
+        /* Header / Tab System */
+        header {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid var(--border);
+            background: rgba(0,0,0,0.8);
+            z-index: 50;
         }
 
-        .btn { 
-            background: none; 
-            border: none; 
-            color: rgba(255,255,255,0.4); 
-            cursor: pointer; 
-            font-size: 1rem; 
-            width: 38px;
-            height: 38px;
+        .tab-bar {
+            height: 48px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 6px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            background: rgba(255,255,255,0.01);
+        }
+        .tab-bar::-webkit-scrollbar { display: none; }
+
+        .tab {
+            height: 34px;
+            min-width: 140px;
+            max-width: 200px;
+            padding: 0 12px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+            animation: tab-in 0.3s ease-out;
+        }
+        @keyframes tab-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .tab:hover { background: var(--glass-hover); }
+        .tab.active { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+
+        .tab img.favicon { width: 16px; height: 16px; border-radius: 4px; }
+        .tab span { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; opacity: 0.6; font-weight: 500; }
+        .tab.active span { opacity: 1; }
+
+        .tab-close {
+            width: 18px;
+            height: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
+            border-radius: 4px;
+            font-size: 10px;
+            opacity: 0;
             transition: 0.2s;
         }
-        
-        .btn:hover { color: #fff; background: rgba(255,255,255,0.06); }
+        .tab:hover .tab-close, .tab.active .tab-close { opacity: 0.4; }
+        .tab-close:hover { opacity: 1 !important; background: rgba(255,255,255,0.1); }
 
-        .omnibar { 
-            flex: 1; 
-            background: rgba(255,255,255,0.04); 
-            border: 1px solid var(--border);
-            border-radius: 14px; 
-            padding: 0 18px; 
-            height: 42px;
+        .add-tab-btn {
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            max-width: 900px;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 8px;
+            opacity: 0.4;
+            transition: 0.2s;
+        }
+        .add-tab-btn:hover { opacity: 1; background: var(--glass-hover); }
+
+        /* Toolbar / Omnibar */
+        .toolbar {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 15px;
+            background: rgba(0,0,0,0.5);
         }
 
+        .btn-grp { display: flex; gap: 5px; }
+        .tool-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            cursor: pointer;
+            border-radius: 10px;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .tool-btn:hover { color: #fff; background: var(--glass-hover); }
+
+        .omnibar {
+            flex: 1;
+            height: 38px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 12px;
+            max-width: 800px;
+            transition: 0.3s;
+        }
+        .omnibar:focus-within { border-color: rgba(255,255,255,0.2); background: var(--glass-hover); }
+
+        .omnibar i { font-size: 12px; opacity: 0.2; }
         .omnibar input {
+            flex: 1;
             background: none;
             border: none;
             outline: none;
             color: #fff;
-            width: 100%;
-            font-size: 14px;
             font-family: inherit;
+            font-size: 13px;
         }
 
-        .omnibar i { opacity: 0.2; font-size: 14px; }
-
-        .viewport { 
-            flex: 1; 
-            position: relative; 
-            background: #fff; 
-            overflow: hidden; 
+        /* Viewport and Home Screen */
+        .viewport-container {
+            flex: 1;
+            position: relative;
+            background: #fff;
         }
 
-        iframe { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
-            background: #fff; 
-            display: block;
+        #home-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: 0.3s;
+            padding-bottom: 100px;
         }
 
+        .hero-text {
+            font-size: 6rem;
+            font-weight: 900;
+            letter-spacing: -6px;
+            margin-bottom: 40px;
+            background: linear-gradient(180deg, #fff, #444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            user-select: none;
+        }
+
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 120px);
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .shortcut {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            gap: 12px;
+        }
+
+        .shortcut:hover {
+            transform: translateY(-5px);
+            background: var(--glass-hover);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .shortcut img { width: 32px; height: 32px; border-radius: 8px; }
+        .shortcut span { font-size: 11px; font-weight: 700; opacity: 0.5; letter-spacing: 0.5px; }
+
+        iframe {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border: none;
+            background: #fff;
+            display: none;
+        }
+        iframe.active { display: block; }
+
+        /* Solid Mode Support */
         body.solid-mode .liquid-glass { background: #0a0a0a; border-color: #1a1a1a; }
+        body.solid-mode header { background: #0a0a0a; }
+        body.solid-mode #home-screen { background: #0a0a0a; }
     </style>
 </head>
 <body class="liquid-mode">
@@ -175,26 +310,64 @@
     </aside>
 
     <main>
-        <div class="toolbar">
-            <button class="btn" onclick="history.back()"><i class="fas fa-chevron-left"></i></button>
-            <button class="btn" onclick="pframe.contentWindow.location.reload()"><i class="fas fa-rotate-right"></i></button>
-            <div class="omnibar">
-                <i class="fas fa-globe"></i>
-                <input type="text" id="url-bar" placeholder="Enter URL or search...">
+        <header>
+            <div class="tab-bar" id="tab-bar">
+                <!-- Tabs Injected Here -->
+                <div class="add-tab-btn" onclick="createNewTab()"><i class="fas fa-plus"></i></div>
             </div>
-            <button class="btn" onclick="location.href='settings.html'"><i class="fas fa-gear"></i></button>
-        </div>
-        <div class="viewport">
-            <iframe id="pframe" name="pframe" allowfullscreen sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation allow-top-navigation-by-user-activation"></iframe>
+            <div class="toolbar">
+                <div class="btn-grp">
+                    <button class="tool-btn" onclick="goBack()" title="Back"><i class="fas fa-chevron-left"></i></button>
+                    <button class="tool-btn" onclick="reloadCurrent()" title="Reload"><i class="fas fa-rotate-right"></i></button>
+                    <button class="tool-btn" onclick="showHomeScreen()" title="Home"><i class="fas fa-house"></i></button>
+                </div>
+                <div class="omnibar">
+                    <i class="fas fa-lock"></i>
+                    <input type="text" id="url-bar" placeholder="Search freely or enter URL...">
+                </div>
+                <button class="tool-btn" onclick="location.href='settings.html'" title="Settings"><i class="fas fa-sliders"></i></button>
+            </div>
+        </header>
+
+        <div class="viewport-container" id="viewport-container">
+            <div id="home-screen">
+                <h1 class="hero-text">WAFFLE</h1>
+                <div class="shortcuts-grid">
+                    <div class="shortcut" onclick="nav('https://duckduckgo.com')">
+                        <img src="https://www.google.com/s2/favicons?domain=duckduckgo.com&sz=64">
+                        <span>DUCKDUCKGO</span>
+                    </div>
+                    <div class="shortcut" onclick="nav('https://youtube.com')">
+                        <img src="https://www.google.com/s2/favicons?domain=youtube.com&sz=64">
+                        <span>YOUTUBE</span>
+                    </div>
+                    <div class="shortcut" onclick="nav('https://discord.com')">
+                        <img src="https://www.google.com/s2/favicons?domain=discord.com&sz=64">
+                        <span>DISCORD</span>
+                    </div>
+                    <div class="shortcut" onclick="nav('https://spotify.com')">
+                        <img src="https://www.google.com/s2/favicons?domain=spotify.com&sz=64">
+                        <span>SPOTIFY</span>
+                    </div>
+                    <div class="shortcut" onclick="nav('https://tiktok.com')">
+                        <img src="https://www.google.com/s2/favicons?domain=tiktok.com&sz=64">
+                        <span>TIKTOK</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Iframes Injected Here -->
         </div>
     </main>
 
     <script src="../js/particle.js"></script>
     <script>
-        const frame = document.getElementById('pframe');
+        const tabBar = document.getElementById('tab-bar');
+        const viewportContainer = document.getElementById('viewport-container');
+        const homeScreen = document.getElementById('home-screen');
         const urlBar = document.getElementById('url-bar');
-        const params = new URLSearchParams(window.location.search);
-        const initialUrl = params.get('url');
+        
+        let tabs = [];
+        let activeTabId = null;
 
         // Sail Connection logic
         const connection = new BareMux.BareMuxConnection("/sail/baremux/worker.js");
@@ -210,6 +383,90 @@
             prefix: "/sail/go/" 
         });
 
+        async function init() {
+            await scramjet.init();
+            const params = new URLSearchParams(window.location.search);
+            const initialUrl = params.get('url');
+            if (initialUrl) {
+                createNewTab(decodeURIComponent(initialUrl));
+            } else {
+                createNewTab();
+            }
+        }
+
+        function createNewTab(url = '') {
+            const id = 'tab-' + Date.now();
+            const tabObj = { id: id, url: url, title: url ? 'Loading...' : 'New Tab' };
+            tabs.push(tabObj);
+            
+            const tabEl = document.createElement('div');
+            tabEl.className = 'tab';
+            tabEl.id = 'trigger-' + id;
+            tabEl.onclick = () => switchTab(id);
+            
+            const domain = url ? new URL(url).hostname : 'about:blank';
+            const iconUrl = `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+
+            tabEl.innerHTML = `
+                <img src="${iconUrl}" class="favicon" id="favicon-${id}" onerror="this.src='https://www.google.com/s2/favicons?sz=64&domain=about:blank'">
+                <span id="title-${id}">${tabObj.title}</span>
+                <div class="tab-close" onclick="closeTab(event, '${id}')"><i class="fas fa-xmark"></i></div>
+            `;
+            tabBar.insertBefore(tabEl, tabBar.querySelector('.add-tab-btn'));
+
+            const iframe = document.createElement('iframe');
+            iframe.id = id;
+            iframe.setAttribute('allowfullscreen', '');
+            iframe.setAttribute('sandbox', 'allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation allow-top-navigation-by-user-activation');
+            viewportContainer.appendChild(iframe);
+
+            switchTab(id);
+            if (url) nav(url);
+        }
+
+        function switchTab(id) {
+            activeTabId = id;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            const trigger = document.getElementById('trigger-' + id);
+            if (trigger) trigger.classList.add('active');
+            
+            document.querySelectorAll('iframe').forEach(f => f.classList.remove('active'));
+            const frame = document.getElementById(id);
+            if (frame) frame.classList.add('active');
+
+            const tab = tabs.find(t => t.id === id);
+            urlBar.value = tab.url || '';
+            
+            if (!tab.url) {
+                homeScreen.style.display = 'flex';
+                homeScreen.style.opacity = '1';
+            } else {
+                homeScreen.style.opacity = '0';
+                setTimeout(() => { if (activeTabId === id && tab.url) homeScreen.style.display = 'none'; }, 300);
+            }
+        }
+
+        function closeTab(e, id) {
+            if (e) e.stopPropagation();
+            if (tabs.length === 1) {
+                const tab = tabs[0];
+                tab.url = '';
+                tab.title = 'New Tab';
+                document.getElementById('title-' + id).textContent = tab.title;
+                document.getElementById('favicon-' + id).src = 'https://www.google.com/s2/favicons?sz=64&domain=about:blank';
+                document.getElementById(id).src = 'about:blank';
+                urlBar.value = '';
+                homeScreen.style.display = 'flex';
+                homeScreen.style.opacity = '1';
+                return;
+            }
+            const idx = tabs.findIndex(t => t.id === id);
+            tabs.splice(idx, 1);
+            document.getElementById('trigger-' + id).remove();
+            document.getElementById(id).remove();
+            if (activeTabId === id) switchTab(tabs[idx] ? tabs[idx].id : tabs[idx - 1].id);
+        }
+
         async function nav(val) {
             let url = val || urlBar.value.trim();
             if (!url) return;
@@ -220,24 +477,54 @@
                 url = "https://" + url;
             }
 
+            const tab = tabs.find(t => t.id === activeTabId);
+            tab.url = url;
+            try {
+                const domain = new URL(url).hostname;
+                tab.title = domain;
+                document.getElementById('title-' + activeTabId).textContent = domain;
+                document.getElementById('favicon-' + activeTabId).src = `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+            } catch {
+                tab.title = url;
+            }
+            
             urlBar.value = url;
+            homeScreen.style.opacity = '0';
+            setTimeout(() => { homeScreen.style.display = 'none'; }, 300);
+            
+            const frame = document.getElementById(activeTabId);
             frame.src = scramjet.encodeUrl(url);
         }
 
-        // Initialize and handle first load
-        scramjet.init().then(() => {
-            if (initialUrl) {
-                nav(decodeURIComponent(initialUrl));
-            }
-        });
+        function goBack() {
+            const frame = document.getElementById(activeTabId);
+            if (frame && frame.contentWindow) frame.contentWindow.history.back();
+        }
 
-        urlBar.onkeydown = (e) => {
-            if (e.key === 'Enter') nav();
-        };
+        function reloadCurrent() {
+            const frame = document.getElementById(activeTabId);
+            if (frame && frame.contentWindow) frame.contentWindow.location.reload();
+        }
 
+        function showHomeScreen() {
+            const tab = tabs.find(t => t.id === activeTabId);
+            tab.url = '';
+            tab.title = 'New Tab';
+            document.getElementById('title-' + activeTabId).textContent = 'New Tab';
+            document.getElementById('favicon-' + activeTabId).src = 'https://www.google.com/s2/favicons?sz=64&domain=about:blank';
+            document.getElementById(activeTabId).src = 'about:blank';
+            urlBar.value = '';
+            homeScreen.style.display = 'flex';
+            homeScreen.style.opacity = '1';
+        }
+
+        urlBar.onkeydown = (e) => { if (e.key === 'Enter') nav(); };
+        
         if (localStorage.getItem('liquid-glass') === 'false') {
             document.body.classList.add('solid-mode');
         }
+
+        init();
     </script>
 </body>
 </html>

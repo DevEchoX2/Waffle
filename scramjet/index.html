@@ -1,7 +1,8 @@
 <h1>Loading Scramjet</h1>
 <p>This only happens the first time you use the site, don't worry.</p>
+<button id="b" style="display: none;">Go back!</button>
 
 <script>
   localStorage.setItem("waffle:firstProxy", "no")
-  setTimeout(() => { window.location.href = "/" }, 1000)
+  setTimeout(() => { document.getElementById("b").style.display = "block" }, 1000)
 </script>

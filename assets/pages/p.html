@@ -107,7 +107,7 @@
             display: flex;
             align-items: flex-end;
             padding: 0 10px;
-            gap: 0px; /* Chrome tabs overlap or touch */
+            gap: 0px;
             overflow-x: auto;
             scrollbar-width: none;
             position: relative;
@@ -126,10 +126,9 @@
             cursor: pointer;
             transition: 0.15s ease;
             z-index: 1;
-            margin-right: -10px; /* Overlap effect */
+            margin-right: -10px;
         }
 
-        /* The Chrome Trapezoid Shape */
         .tab::before {
             content: '';
             position: absolute;
@@ -233,7 +232,7 @@
             justify-content: center;
             background: none;
             border: none;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255, 255, 255, 0.4);
             cursor: pointer;
             border-radius: 12px;
             transition: 0.2s;
@@ -337,7 +336,6 @@
         }
         iframe.active { display: block; }
 
-        /* Solid Mode Support */
         body.solid-mode .liquid-glass { background: #0a0a0a; border-color: #1a1a1a; }
         body.solid-mode .tab-bar-container { background: #0a0a0a; }
         body.solid-mode .toolbar { background: #0a0a0a; }
@@ -349,6 +347,7 @@
         <div class="logo" onclick="location.href='../../index.html'">W</div>
         <div class="nav-items">
             <a href="../../index.html" class="nav-link" title="Home"><i class="fas fa-house"></i></a>
+            <a href="p.html" class="nav-link active" title="Browser"><i class="fas fa-globe"></i></a>
             <a href="g.html" class="nav-link" title="Games"><i class="fas fa-gamepad"></i></a>
             <a href="iframe.html" class="nav-link" title="Movies"><i class="fas fa-clapperboard"></i></a>
             <a href="extra.html" class="nav-link" title="Apps"><i class="fas fa-th-large"></i></a>
@@ -360,7 +359,6 @@
     <main>
         <div class="tab-bar-container">
             <div class="tab-bar" id="tab-bar">
-                <!-- Tabs Injected Here -->
                 <div class="add-tab-btn" onclick="createNewTab()"><i class="fas fa-plus"></i></div>
             </div>
         </div>
@@ -391,7 +389,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Iframes Injected Here -->
         </div>
 
         <div class="toolbar">
@@ -418,7 +415,6 @@
         let tabs = [];
         let activeTabId = null;
 
-        // Sail Connection logic
         const connection = new BareMux.BareMuxConnection("/sail/baremux/worker.js");
         connection.setTransport("/sail/libcurl/index.mjs", [{ websocket: "wss://wisp.rhw.one/" }]);
 
@@ -433,13 +429,20 @@
         });
 
         async function init() {
-            await scramjet.init();
+            // Immediately start with a tab
             const params = new URLSearchParams(window.location.search);
             const initialUrl = params.get('url');
             if (initialUrl) {
                 createNewTab(decodeURIComponent(initialUrl));
             } else {
                 createNewTab();
+            }
+
+            // Init engine in background
+            try {
+                await scramjet.init();
+            } catch (e) {
+                console.error("Failed to initialize proxy engine:", e);
             }
         }
 
@@ -569,10 +572,20 @@
 
         urlBar.onkeydown = (e) => { if (e.key === 'Enter') nav(); };
         
+        window.addEventListener('keydown', (e) => {
+            if (e.altKey && (e.key === 'n' || e.key === 't')) { e.preventDefault(); createNewTab(); }
+            if (e.altKey && e.key === 'w') { e.preventDefault(); closeTab(null, activeTabId); }
+            if (e.altKey && !isNaN(e.key) && e.key !== '0') {
+                const idx = parseInt(e.key) - 1;
+                if (tabs[idx]) switchTab(tabs[idx].id);
+            }
+        });
+
         if (localStorage.getItem('liquid-glass') === 'false') {
             document.body.classList.add('solid-mode');
         }
 
+        // Start initialization
         init();
     </script>
 </body>

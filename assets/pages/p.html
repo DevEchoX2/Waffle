@@ -109,7 +109,6 @@
             overflow: hidden;
         }
 
-        /* Tab styling from image reference: Dark, rounded, minimal */
         .tab {
             height: 32px;
             min-width: 150px;
@@ -220,7 +219,14 @@
             font-size: 12px;
             font-weight: 500;
         }
-        .omnibar i { font-size: 11px; opacity: 0.3; }
+        .omnibar input:disabled { opacity: 0.3; cursor: wait; }
+        .omnibar .search-trigger {
+            font-size: 12px;
+            opacity: 0.4;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .omnibar .search-trigger:hover { opacity: 1; transform: scale(1.1); }
 
         /* Viewport / Home */
         .viewport-stack { flex: 1; position: relative; background: #000; }
@@ -288,9 +294,10 @@
             font-family: inherit;
             font-size: 16px;
         }
+        .home-search input:disabled { opacity: 0.3; cursor: wait; }
 
-        .home-search i { font-size: 18px; opacity: 0.3; cursor: pointer; }
-        .home-search i:hover { opacity: 0.8; }
+        .home-search .home-search-btn { font-size: 18px; opacity: 0.3; cursor: pointer; transition: 0.2s; }
+        .home-search .home-search-btn:hover { opacity: 0.8; color: #fff; transform: scale(1.1); }
 
         .shortcut-grid {
             display: grid;
@@ -365,7 +372,8 @@
                 </div>
                 <div class="omnibar">
                     <i class="fas fa-lock"></i>
-                    <input type="text" id="url-bar" placeholder="Search or enter URL" autocomplete="off" spellcheck="false">
+                    <input type="text" id="url-bar" placeholder="Initializing proxy..." disabled autocomplete="off" spellcheck="false">
+                    <i class="fas fa-arrow-right search-trigger" onclick="nav('bar')"></i>
                 </div>
             </div>
         </header>
@@ -377,8 +385,8 @@
                     <div class="slogan">Next-Gen Browsing. No Limits.</div>
                 </div>
                 <div class="home-search">
-                    <input type="text" id="home-input" placeholder="Search with DuckDuckGo..." autocomplete="off">
-                    <i class="fas fa-search" onclick="nav('home')"></i>
+                    <input type="text" id="home-input" placeholder="Initializing proxy..." disabled autocomplete="off">
+                    <i class="fas fa-search home-search-btn" onclick="nav('home')"></i>
                 </div>
                 <div class="shortcut-grid">
                     <div class="shortcut" onclick="nav('https://google.com')">
@@ -428,6 +436,7 @@
         
         let tabs = [];
         let activeTabId = null;
+        let isProxyReady = false;
 
         // Sail Connection
         const connection = new BareMux.BareMuxConnection("/sail/baremux/worker.js");
@@ -444,7 +453,22 @@
         });
 
         async function init() {
-            try { await scramjet.init(); } catch(e) { console.warn("Proxy engine init fail:", e); }
+            try { 
+                await scramjet.init(); 
+                isProxyReady = true;
+                
+                // Enable inputs and update text
+                urlBar.disabled = false;
+                urlBar.placeholder = "Search or enter URL";
+                homeInput.disabled = false;
+                homeInput.placeholder = "Search with DuckDuckGo...";
+                
+                console.log("Waffle Proxy ready.");
+            } catch(e) { 
+                console.error("Proxy engine init fail:", e);
+                urlBar.placeholder = "Proxy Error. Check console.";
+            }
+
             const params = new URLSearchParams(window.location.search);
             const initialUrl = params.get('url');
             if (initialUrl) {
@@ -496,7 +520,7 @@
             if (!tab.url) {
                 homeScreen.style.display = 'flex';
                 homeInput.value = '';
-                homeInput.focus();
+                if (!homeInput.disabled) homeInput.focus();
             } else {
                 homeScreen.style.display = 'none';
             }
@@ -524,11 +548,20 @@
             }
         }
 
-        async function nav(val) {
-            let url;
-            if (val === 'home') url = homeInput.value.trim();
-            else url = typeof val === 'string' ? val : urlBar.value.trim();
+        async function nav(source = 'bar') {
+            if (!isProxyReady) {
+                console.warn("Proxy not ready yet.");
+                return;
+            }
+
+            const inputElement = source === 'home' ? homeInput : urlBar;
+            let url = inputElement.value.trim();
             
+            // If direct shortcut call (source is already URL)
+            if (typeof source === 'string' && (source.startsWith('http') || source.includes('.')) && source !== 'home' && source !== 'bar') {
+                url = source;
+            }
+
             if (!url) return;
 
             // Robust Search/URL Logic
@@ -539,6 +572,8 @@
             }
 
             const tab = tabs.find(t => t.id === activeTabId);
+            if (!tab) return;
+            
             tab.url = url;
             
             try {
@@ -555,12 +590,18 @@
             homeScreen.style.display = 'none';
             
             const frame = document.getElementById(activeTabId);
-            if (typeof scramjet !== 'undefined' && scramjet.encodeUrl) {
-                frame.src = scramjet.encodeUrl(url);
-            } else {
-                frame.src = url;
+            if (frame) {
+                // Important: Try to use Scramjet encoding
+                try {
+                    frame.src = scramjet.encodeUrl(url);
+                } catch (e) {
+                    console.error("Proxy encoding error, falling back to direct:", e);
+                    frame.src = url;
+                }
             }
+            
             urlBar.blur();
+            homeInput.blur();
         }
 
         function goBack() {
@@ -578,20 +619,17 @@
             if (frame) frame.src = frame.src; 
         }
 
-        // Robust Input Handlers for 'Enter' key
-        urlBar.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+        // Broad 'Enter' key support for all platforms
+        const handleKeyDown = (e, source) => {
+            // Check for key 'Enter' or keycode 13 (legacy support)
+            if (e.key === 'Enter' || e.keyCode === 13) {
                 e.preventDefault();
-                nav();
+                nav(source);
             }
-        });
-        
-        homeInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                nav('home');
-            }
-        });
+        };
+
+        urlBar.addEventListener('keydown', (e) => handleKeyDown(e, 'bar'));
+        homeInput.addEventListener('keydown', (e) => handleKeyDown(e, 'home'));
 
         init();
     </script>
